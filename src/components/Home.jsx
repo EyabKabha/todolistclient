@@ -12,7 +12,7 @@ function Home() {
   const today = date.toISOString().split("T")[0];
   const [allWorkers, setAllWorkers] = useState([{}]);
   const effectRan = useRef(false);
-
+  
   const initialStateCash = {
     date: "",
     amount: "",
@@ -151,7 +151,6 @@ function Home() {
     }
   };
 
-
   const handleDataCheck = (event) => {
     const { name, value } = event.target;
     setMyChecksData({ ...myChecksData, [name]: value });
@@ -175,7 +174,7 @@ function Home() {
 
   const getAllWorkets = async () => {
     try {
-      const data = await instance.get(`/workers/getall/${decoded._id}`);
+      const data = await instance.get(`/workers/getall/${decoded._id}`, { headers: { "authorization": `${myToken}` } });
       if (data.status === 200) {
         setAllWorkers(data.data);
       }

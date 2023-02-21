@@ -1,20 +1,41 @@
-import React from 'react';
+import React, {  useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import './styles/index.css';
 import reportWebVitals from './reportWebVitals';
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import Home from './components/Home';
 import Reports from './components/Reports';
 import AddWorker from './components/AddWorker';
 import Navbar from './components/Navbar';
 import Login from './components/Login';
+import instance from './api/connection';
+
 
 export default function App() {
+  const navigate = useNavigate();
   const location = useLocation()
   const myRoutes = ['/worker', '/reports', '/home']
 
+  
+  const checkAuth = async () => {
+    try {
+      const myToken = localStorage.getItem("token");
+      const data = await instance.get(`/authvalidation/checkauth`, { headers: { "authorization": `${myToken}` } });
+    } catch (error) { 
+      localStorage.clear()
+      navigate('/login')
+    }
+  }
+
+  useEffect(() => {
+    const getToken = localStorage.getItem('token');
+    if (getToken!== null) {
+      checkAuth();
+    }
+  });
+
   return (
-    <div>
+    <div key='uniqueKey'>
       {myRoutes.includes(location.pathname) ? <Navbar /> : null}
       <Routes>
         <Route path="/worker" element={<AddWorker />}> </Route>
