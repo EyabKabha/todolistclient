@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faHouseUser, faStickyNote ,faHelmetSafety, faArrowRightFromBracket} from '@fortawesome/free-solid-svg-icons'
+import authService from "../services/auth";
 function Navbar() {
   return (
     <div className="nav" style={{ display: "contents" }}>
@@ -29,7 +30,7 @@ function Navbar() {
         <Menu.Item key="logout">
           <div style={{ position:'d-flex',justifyContent:'flex-end'}}>
         <FontAwesomeIcon icon={faArrowRightFromBracket} size={"xl"}/>
-          <Link to="/logout" >Log Out</Link>
+          <Link to="/logout" onClick={authService.deleteAuth}>Log Out</Link>
           </div>
         </Menu.Item>
 
