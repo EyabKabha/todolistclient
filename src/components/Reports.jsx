@@ -1,14 +1,15 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef ,useContext} from "react";
 import { PieChart } from "react-minimal-pie-chart";
 import { Row, Col } from "react-bootstrap";
 import DataTable from "react-data-table-component";
 import CustomLoader from "./CustomLoader";
 import instance from "../api/connection";
 import jwt_decode from "jwt-decode";
+import { UserContext } from "../shared/UserContext.js";
 function Reports() {
-
-  const myToken = localStorage.getItem("token");
-  const decoded = jwt_decode(myToken);
+  const { myToken, decoded} = useContext(UserContext);
+  // const myToken = localStorage.getItem("token");
+  // const decoded = jwt_decode(myToken);
   const [pending, setPending] = useState(true);
   const [myCurrentTable, setMyCurrentTable] = useState(0);
   const [myTableData, setMyTableData] = useState([{}]);
@@ -18,7 +19,7 @@ function Reports() {
   useEffect(() => {
     if (effectRan.current === false) {
       const fetchData = async () => {
-        const mytotal = await instance.get(`/total/all/${decoded._id}`);
+        const mytotal = await instance.get(`/total/all/${decoded._id}`, { headers: { "authorization": `${myToken}` } });
         setMyTotalPayments(mytotal.data);
       }
       fetchData();
@@ -34,7 +35,7 @@ function Reports() {
       const myCurrentUser = decoded._id;
       if (data[segmentIndex].title === "Card") {
         setPending(true);
-        const credit_data = await instance.get(`/credit/getcredit/${myCurrentUser}`)
+        const credit_data = await instance.get(`/credit/getcredit/${myCurrentUser}`,{ headers: { "authorization": `${myToken}` } })
         if(credit_data.status === 200){
           setPending(false);
           setMyTableData(credit_data.data);
@@ -42,7 +43,7 @@ function Reports() {
         }
       } else if (data[segmentIndex].title === "Checks") {
         setPending(true);
-        const check_data = await instance.get(`/check/all/${myCurrentUser}`);
+        const check_data = await instance.get(`/check/all/${myCurrentUser}`,{ headers: { "authorization": `${myToken}` } });
         if (check_data.status === 200) {
           setPending(false);
           setMyCurrentTable(segmentIndex);
@@ -51,7 +52,7 @@ function Reports() {
       } else {
         setPending(true);
         setMyCurrentTable(segmentIndex);
-        const my_data = await instance.get(`/cashData/cashdata/${myCurrentUser}`);
+        const my_data = await instance.get(`/cashData/cashdata/${myCurrentUser}`,{ headers: { "authorization": `${myToken}` } });
         setPending(false);
         setMyTableData(my_data.data);
       }
