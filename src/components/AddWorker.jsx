@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef ,useContext} from "react";
 import { Form, Col, Row, Container, Button, } from "react-bootstrap";
 import DataTable from "react-data-table-component";
 import instance from "../api/connection";
-import jwt_decode from "jwt-decode";
 import '../styles/index.css';
 import ProgressBar from "@ramonak/react-progress-bar";
 import "react-toastify/dist/ReactToastify.css";
@@ -11,14 +10,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircle } from '@fortawesome/free-solid-svg-icons'
 import { UserContext } from "../shared/UserContext.js";
 function AddWorker() {
-  const { myToken, decoded} = useContext(UserContext);
+  const { userDataInfo} = useContext(UserContext);
   const [pending, setPending] = useState(true);
   const effectRan = useRef(false);
-  // const myToken = localStorage.getItem('token')
-  // const decoded = jwt_decode(myToken);
   const [dataWorker, setDataWorker] = useState([{}]);
   const [dataWorkerInputs, setDataWorkerInputs] = useState([{ name: "", amount: "", status: "" }]);
-  // const [myFontColor, setMyFontColor] = useState('red')
 
   useEffect(() => {
     if (effectRan.current === false) {
@@ -32,8 +28,8 @@ function AddWorker() {
   const initalData = async () => {
     try {
 
-      const myData = await instance.get(`/workers/getall/${decoded._id}`,{ headers: { "authorization": `${myToken}` } });
-      const amountPerWorker = await instance.get(`/totalamount/total/${decoded._id}`,  { headers: { "authorization": `${myToken}` } })
+      const myData = await instance.get(`/workers/getall/${userDataInfo.decoded._id}`,{ headers: { "authorization": `${userDataInfo.token}` } });
+      const amountPerWorker = await instance.get(`/totalamount/total/${userDataInfo.decoded._id}`,  { headers: { "authorization": `${userDataInfo.token}` } })
 
       if (myData.status === 200) {
         const myArr = []
@@ -115,7 +111,7 @@ function AddWorker() {
         remain:<div><FontAwesomeIcon icon={faCircle} style={{color:'red'}} size={"xl"} />{dataWorkerInputs.amount}</div>,
         percentage: <ProgressBar maxCompleted={100} className="wrapper" completed={0} bgColor={'linear-gradient(90deg, rgba(13,189,31,1) 1%, rgba(80,174,207,1) 42%, rgba(208,185,79,1) 55%, rgba(0,212,255,1) 92%)'} animateOnRender />
       }
-      const data = await instance.post(`/workers/new/${decoded._id}`,dataWorkerInputs, { headers: { "authorization": `${myToken}` } })
+      const data = await instance.post(`/workers/new/${userDataInfo.decoded._id}`,dataWorkerInputs, { headers: { "authorization": `${userDataInfo.token}` } })
       if (data.status === 200) {
         toast.success(`${data.data}`, {
           position: "top-right",

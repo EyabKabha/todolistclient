@@ -30,7 +30,7 @@ function Navbar() {
         <Menu.Item key="logout">
           <div style={{ position:'d-flex',justifyContent:'flex-end'}}>
         <FontAwesomeIcon icon={faArrowRightFromBracket} size={"xl"}/>
-          <Link to="/logout" onClick={authService.deleteAuth}>Log Out</Link>
+          <Link to="/login" onClick={authService.deleteAuth}>Log Out</Link>
           </div>
         </Menu.Item>
 
