@@ -1,20 +1,15 @@
 import React, { useEffect, useState, useRef, useContext } from "react";
 import { Row, Col, Button, Form } from "react-bootstrap";
 import instance from "../api/connection.js";
-import jwt_decode from "jwt-decode";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer, toast } from "react-toastify";
 import { validation, validationChecks } from "../shared/validation";
 import classnames from "vest/classnames";
 import {toastWarning,toastSuccess} from '../shared/toastWarning';
-// import {myData} from "../shared/state";
 import { UserContext } from "../shared/UserContext.js";
-function Home() {
-  // console.log(myData)
-  const { firstName, lastName , myToken, decoded} = useContext(UserContext);
 
-  // const myToken = localStorage.getItem("token")
-  // const decoded = jwt_decode(myToken)
+function Home() {
+  const { userDataInfo} = useContext(UserContext);
   const date = new Date();
   const today = date.toISOString().split("T")[0];
   const [allWorkers, setAllWorkers] = useState([{}]);
@@ -23,8 +18,6 @@ function Home() {
   const [formstateCheck, setFormstateCheck] = useState({});
   const res = validation.get();
   const resCheck = validationChecks.get();
-  // const [myToken, setMyToken] = useState(null);
-  // const [decoded, setDecoded] = useState(null);
 
   const cn = classnames(res, {
     invalid: "form-control is-invalid",
@@ -67,7 +60,7 @@ function Home() {
     setMyCashData({ ...myCashData, [name]: value });
 
     const nextState = { ...formstate, [name]: value };
-    const result = validation(nextState, [name]);
+    validation(nextState, [name]);
     setFormstate(nextState);
 
   };
@@ -95,10 +88,10 @@ function Home() {
       toastWarning('At least one of the fields is empty')
     }
     if (!isEmptyField) {
-      const validateValue = await instance.get(`/totalamount/total/${decoded._id}`, { headers: { "authorization": `${myToken}` } });
+      const validateValue = await instance.get(`/totalamount/total/${userDataInfo.decoded._id}`, { headers: { "authorization": `${userDataInfo.myToken}` } });
       const myValue = validateValue.data.find((key) => key.for === myCashData.for);
       if (myValue.amount + parseInt(myCashData.amount) <= myValue.total) {
-        const myDataCash = await instance.post(`/cashData/mycashdata/${decoded._id}`, myCashData, { headers: { "authorization": `${myToken}` } });
+        const myDataCash = await instance.post(`/cashData/mycashdata/${userDataInfo.decoded._id}`, myCashData, { headers: { "authorization": `${userDataInfo.myToken}` } });
         if (myDataCash.status === 200) {
           toastSuccess(`${myDataCash.data}`)
           clearState("Cash");
@@ -112,11 +105,11 @@ function Home() {
 
   const saveDataCheck = async () => {
 
-    const validateValueCheck = await instance.get(`/totalamount/total/${decoded._id}`);
+    const validateValueCheck = await instance.get(`/totalamount/total/${userDataInfo.decoded._id}`);
     const myValue = validateValueCheck.data.find((key) => key.for === myChecksData.for);
 
     if (myValue.amount + parseInt(myChecksData.amount) <= myValue.total) {
-      const myDataCheck = await instance.post(`/check/newcheck/${decoded._id}`, myChecksData);
+      const myDataCheck = await instance.post(`/check/newcheck/${userDataInfo.decoded._id}`, myChecksData);
 
       if (myDataCheck.status === 200) {
         toast.success(`${myDataCheck.data}`, {
@@ -145,11 +138,11 @@ function Home() {
   };
 
   const saveDataCredit = async () => {
-    const validateValue = await instance.get(`/totalamount/total/${decoded._id}`);
+    const validateValue = await instance.get(`/totalamount/total/${userDataInfo.decoded._id}`);
     const myValue = validateValue.data.find((key) => key.for === myCreditData.for);
 
     if (myValue.amount + parseInt(myCreditData.amount) <= myValue.total) {
-      const saveCard = await instance.post(`/credit/newcredit/${decoded._id}`, myCreditData);
+      const saveCard = await instance.post(`/credit/newcredit/${userDataInfo.decoded._id}`, myCreditData);
       if (saveCard.status === 200) {
         toast.success(`${saveCard.data}`, {
           position: "top-right",
@@ -181,7 +174,7 @@ function Home() {
     setMyChecksData({ ...myChecksData, [name]: value });
 
     const nextState = { ...formstateCheck, [name]: value };
-    const result = validationChecks(nextState, [name]);
+    validationChecks(nextState, [name]);
     setFormstateCheck(nextState);
 
   };
@@ -192,39 +185,29 @@ function Home() {
     setMyCreditData({ ...myCreditData, [name]: value });
 
     const nextState = { ...formstate, [name]: value };
-    const result = validation(nextState, [name]);
+    validation(nextState, [name]);
     setFormstate(nextState);
 
   };
 
+  const getAllWorkets = async () => {
+    try {
+      const data = await instance.get(`/workers/getall/${userDataInfo.decoded._id}`, { headers: { "authorization": `${userDataInfo.token}` } });
+      if (data.status === 200) {
+        setAllWorkers(data.data);
+      }
+    } catch (error) { }
+  };
 
   useEffect(() => {
     if (effectRan.current === false) {
-      console.log('in use effect home')
         getAllWorkets();
-        checkToken();
     }
     return () => {
       effectRan.current = true;
     };
   });
 
-  const getAllWorkets = async () => {
-    try {
-      const data = await instance.get(`/workers/getall/${decoded._id}`, { headers: { "authorization": `${myToken}` } });
-      if (data.status === 200) {
-        setAllWorkers(data.data);
-      }
-    } catch (error) { }
-  };
-  const checkToken = ()=>{
-    console.log('in check token')
-    // const myToken = localStorage.getItem("token")
-    // setMyToken(myToken);
-    // const decoded = jwt_decode(myToken)
-    // setDecoded(decoded)
-    // console.log(decoded)
-  }
   return (
     <div>
       <Row>
@@ -238,8 +221,7 @@ function Home() {
                 Color: "GrayText",
               }}
             >
-              {/* Welcome {decoded.first_name} {decoded.last_name} */}
-              Welcome, {firstName} {lastName}!
+              Welcome, {userDataInfo.first_name} {userDataInfo.last_name}!
             </h5>
           </div>
         </Col>
@@ -289,9 +271,9 @@ function Home() {
               name="for"
               value={myCashData.for}
             >
-              <option value="">Open this select menu</option>
-              {allWorkers.map((item) => {
-                return <option value={item.name}>{item.name}</option>;
+              <option  key="" value="">Open this select menu</option>
+              {allWorkers.map((item,index) => {
+                return <option key={index} value={item.name}>{item.name}</option>;
               })}
             </Form.Select>
           </div>
@@ -374,9 +356,9 @@ function Home() {
               value={myChecksData.for}
               onChange={handleDataCheck}
             >
-              <option value="">Open this select menu</option>
-              {allWorkers.map((item) => {
-                return <option value={item.name}>{item.name}</option>;
+              <option key="" value="">Open this select menu</option>
+              {allWorkers.map((item,index) => {
+                return <option key={index} value={item.name}>{item.name}</option>;
               })}
             </Form.Select>
             <small style={{ color: 'red' }}>{resCheck.getErrors("for")}</small>
@@ -440,9 +422,9 @@ function Home() {
               value={myCreditData.for}
               onChange={handleCreditData}
             >
-              <option >Open this select menu</option>
-              {allWorkers.map((item) => {
-                return <option value={item.name}>{item.name}</option>;
+              <option key="" value="">Open this select menu</option>
+              {allWorkers.map((item,index) => {
+                return <option key={index} value={item.name}>{item.name}</option>;
               })}
             </Form.Select>
           </div>
