@@ -1,11 +1,11 @@
 pipeline {
     agent any
     stages{
-        stage("Clean the folder"){
-            steps{
-                cleanWs()
-            }
-        }
+        // stage("Clean the folder"){
+        //     steps{
+        //         cleanWs()
+        //     }
+        // }
         // stage("Checkout"){
         //     steps{
         //         git branch: 'main' , url:'https://github.com/EyabKabha/todolistclient.git'
