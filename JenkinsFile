@@ -1,7 +1,7 @@
 pipeline {
     agent any
     stages{
-        stage("Clean the folder"){
+        stage("Clean the folder 1"){
             steps{
                 cleanWs()
             }
