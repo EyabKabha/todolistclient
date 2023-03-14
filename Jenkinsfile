@@ -21,7 +21,7 @@ pipeline {
         //         bat 'npm cache clean --force'
         //     }
         // }
-        stage("Build"){
+        stage("Build 2"){
             steps{
                 bat 'npm run build'
             }
